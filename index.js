@@ -26,7 +26,14 @@ app.use(
         extended: true,
     })
 );
-app.use(cors());
+
+app.use(cors({
+  origin: '*', // allow all origins
+  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization']
+}));
+
+
 const stripe = require('stripe')(process.env.STRIPE_SECRET);
 app.post('/api/pay', async (req, res) => {
     var price = req.body.price;
