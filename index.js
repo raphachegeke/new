@@ -28,10 +28,12 @@ app.use(
 );
 
 app.use(cors({
-  origin: '*', // allow all origins
-  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
-  allowedHeaders: ['Content-Type','Authorization']
+  origin: ['https://resume-redgiant-testing.vercel.app'], // allow your Vercel frontend
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+app.options('*', cors());
 
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET);
