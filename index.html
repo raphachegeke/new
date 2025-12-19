@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resume Shop</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="p-5">
+
+<div class="container">
+  <h1 class="mb-5 text-center">Resume Marketplace</h1>
+
+  <!-- Resumes list -->
+  <div class="row" id="resume-list">
+    <!-- Resume cards inserted here dynamically -->
+  </div>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Enter Phone for M-PESA</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="text" id="user-phone" class="form-control" placeholder="2547XXXXXXXX">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-warning" id="pay-button">Pay</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const baseURL = 'https://new-ww1k.onrender.com'; // your backend
+  let selectedResume = null;
+
+  // Demo resume list (replace with fetch from /api/resume if available)
+  const resumes = [
+    { id: '101', name: 'Chege', price: 10 },
+    { id: '102', name: 'Rapha', price: 15 },
+  ];
+
+  const resumeList = document.getElementById('resume-list');
+  resumes.forEach(resume => {
+    const col = document.createElement('div');
+    col.className = 'col-md-4 mb-3';
+    col.innerHTML = `
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">${resume.name}</h5>
+          <p class="card-text">Price: Ksh${resume.price}</p>
+          <button class="btn btn-primary buy-btn" data-id="${resume.id}" data-name="${resume.name}" data-price="${resume.price}">Buy / Download</button>
+        </div>
+      </div>
+    `;
+    resumeList.appendChild(col);
+  });
+
+  // Show modal on buy button click
+  document.querySelectorAll('.buy-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      selectedResume = {
+        id: e.target.dataset.id,
+        name: e.target.dataset.name,
+        price: e.target.dataset.price
+      };
+      const phoneInput = document.getElementById('user-phone');
+      phoneInput.value = '';
+      const modal = new bootstrap.Modal(document.getElementById('paymentModal'));
+      modal.show();
+    });
+  });
+
+  // Pay button in modal
+  document.getElementById('pay-button').addEventListener('click', async () => {
+    const phone = document.getElementById('user-phone').value;
+    if (!phone) return alert('Enter phone number');
+
+    // Trigger M-PESA payment
+    try {
+      const res = await fetch(`${baseURL}/api/mpesa/pay`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phone,
+          amount: selectedResume.price,
+          accountRef: selectedResume.name
+        })
+      });
+      const data = await res.json();
+
+      if (data.error) {
+        alert('Payment failed: ' + data.error);
+        return;
+      }
+
+      alert('STK Push sent! Complete payment on your phone.');
+      
+      // Optionally poll your backend or wait some seconds, then download resume
+      const downloadRes = await fetch(`${baseURL}/api/export`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          resumeName: selectedResume.name,
+          resumeId: selectedResume.id,
+          language: 'en'
+        })
+      });
+      const blob = await downloadRes.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${selectedResume.name}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      alert('Resume downloaded!');
+    } catch(err) {
+      alert('Error: ' + err.message);
+    }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
