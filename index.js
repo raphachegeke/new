@@ -34,7 +34,13 @@ app.use(cors({
 }));
 
 app.options('*', cors());
+// Serve static files from public folder
+app.use(express.static(path.join(__dirname, 'public')));
 
+// Send index.html on visiting "/"
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET);
 app.post('/api/pay', async (req, res) => {
