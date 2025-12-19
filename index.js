@@ -1,7 +1,7 @@
 const express = require('express');
-const https = require('https');
-const http = require('http');
-const fs = require('fs');
+//const https = require('https');
+//const http = require('http');
+//const fs = require('fs');
 const path = require('path');
 
 // Add fetch polyfill for older Node.js versions
@@ -99,7 +99,12 @@ app.get('/api/return', async (req, res) => {
 });
 
 //changed here
-if (process.env.NODE_ENV === 'production') {  const httpsServer = https.createServer(    {      key: fs.readFileSync(`/etc/letsencrypt/live/${websiteName}/privkey.pem`),      cert: fs.readFileSync(`/etc/letsencrypt/live/${websiteName}/fullchain.pem`),    },    app  );  httpsServer.listen(port, () => {    console.log('HTTPS server running on port ' + port);  });} else {  app.listen(port, () => {    console.log('HTTP server running on port ' + port);  });}
+const PORT = process.env.PORT || 8080;
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
 
 app.get('/api/linkedin-scraper', async (req, res) => {
     try {

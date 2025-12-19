@@ -5,13 +5,13 @@ const router = express.Router();
 
 router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
+const MPESA_CALLBACK_URL = 'https://anchormen.onrender.com/api/mpesa/callback';
 
 const {
   MPESA_CONSUMER_KEY,
   MPESA_CONSUMER_SECRET,
   MPESA_SHORTCODE,
   MPESA_PASSKEY,
-  MPESA_CALLBACK_URL,
   MPESA_ENV
 } = process.env;
 
