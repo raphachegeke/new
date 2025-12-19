@@ -17,6 +17,8 @@ const app = express();
 const cors = require('cors');
 const port = 8080;
 const websiteName = 'domain.com'; /// add your domain like this format domain.com
+const mpesaRoutes = require('./routes/mpesa');
+app.use('/api', mpesaRoutes);
 
 app.use(express.json());
 app.use(
@@ -86,31 +88,18 @@ app.post('/api/export', async (req, res) => {
 });
 
 // Import AI routes
-const aiRoutes = require('./routes/ai');
+//const aiRoutes = require('./routes/ai');
 
 // Use AI routes
-app.use('/api', aiRoutes);
+//app.use('/api', aiRoutes);
 
 /// Just to check if api is working
 app.get('/api/return', async (req, res) => {
     res.end('Hello World\n');
 });
 
-// Listen both http & https ports
-  const httpsServer = https.createServer(
-      {
-         // UPDATE 1.0.0 No need to update this 2 lines
-          key: fs.readFileSync('/etc/letsencrypt/live/' + websiteName + '/privkey.pem'),
-          cert: fs.readFileSync('/etc/letsencrypt/live/' + websiteName + '/fullchain.pem'),
-      },
-      app
-);
-
-//const httpServer = http.createServer({}, app);
-
-httpsServer.listen(port, () => {
-    console.log('HTTPS Server running on port ' + port);
-});
+//changed here
+if (process.env.NODE_ENV === 'production') {  const httpsServer = https.createServer(    {      key: fs.readFileSync(`/etc/letsencrypt/live/${websiteName}/privkey.pem`),      cert: fs.readFileSync(`/etc/letsencrypt/live/${websiteName}/fullchain.pem`),    },    app  );  httpsServer.listen(port, () => {    console.log('HTTPS server running on port ' + port);  });} else {  app.listen(port, () => {    console.log('HTTP server running on port ' + port);  });}
 
 app.get('/api/linkedin-scraper', async (req, res) => {
     try {
